@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>ZERO HORIZON</title>
+
+<meta
+name="theme-color"
+content="#090909">
+
+<link
+rel="preconnect"
+href="https://fonts.googleapis.com">
+
+<link
+rel="preconnect"
+href="https://fonts.gstatic.com"
+crossorigin>
+
+<link
+href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
+
+<link
+rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+
+
+<div class="app">
+
+
+
+<!-- =======================================
+SIDEBAR
+======================================= -->
+
+<aside class="sidebar">
+
+
+
+<div>
+
+
+
+<div class="logo">
+
+<div class="logo-circle">
+
+<img src="img/logo.png" alt="ZERO HORIZON">
+
+</div>
+
+<h1>
+
+ZERO
+
+<span>HORIZON</span>
+
+</h1>
+
+<p>
+
+UNIFIED GUIDE SYSTEM
+
+</p>
+
+</div>
+
+
+
+<nav class="side-nav">
+
+
+
+<button class="nav-btn active" data-section="history">
+    조직 개요
+</button>
+
+<button class="nav-btn" data-section="gent">
+    젠트 임포리움
+</button>
+
+<button class="nav-btn" data-section="hwa">
+    화안 교도소
+</button>
+
+<button class="nav-btn" data-section="chapel">
+    청천빛 예배당
+</button>
+
+<button class="nav-btn" data-section="korea">
+    한국 지사
+</button>
+
+
+</nav>
+
+</div>
+
+</aside>
+
+
+
+<!-- =======================================
+MAIN
+======================================= -->
+
+
+
+<main class="content">
+
+
+<!-- =======================================
+TOP HEADER
+======================================= -->
+
+<header class="top-header">
+
+    <div class="header-left">
+
+        <h2>// History</h2>
+
+        <p>
+            제로 호라이즌의 시작과 기록
+        </p>
+
+    </div>
+
+    <div class="header-right">
+
+        <div class="search-box">
+
+            <svg
+                class="search-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2">
+
+                <circle cx="11" cy="11" r="8"/>
+
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+
+            </svg>
+
+            <input
+                id="searchInput"
+                type="text"
+                placeholder="Search record..." />
+
+        </div>
+
+
+    </div>
+
+</header>
+
+<!-- =======================================
+CARD GRID
+======================================= -->
+
+<section
+    id="cards"
+    class="card-grid">
+
+</section>
+
+
+<!-- =======================================
+DOCUMENT VIEW
+======================================= -->
+
+<section id="documentView" class="document-view">
+
+    <div class="document-container">
+
+        <div id="documentContent"></div>
+
+    </div>
+
+</section>
+
+
+<!-- =======================================
+FOOTER
+======================================= -->
+
+<footer>
+
+    ZERO <span>HORIZON</span>
+
+</footer>
+
+</main>
+
+</div>
+
+
+
+<!-- =======================================
+RECORD MODAL
+======================================= -->
+
+<div
+    id="recordModal"
+    class="modal">
+
+    <div class="modal-window">
+
+        <button
+            class="modal-close"
+            id="closeModal">
+
+            ×
+
+        </button>
+
+        <div class="modal-image">
+
+            <img
+                id="modalImage"
+                src=""
+                alt="">
+
+        </div>
+
+        <div class="modal-body">
+
+            <div
+                id="modalTag"
+                class="modal-tag">
+
+                FOUNDATION
+
+            </div>
+
+            <h2 id="modalTitle">
+
+                ZERO HORIZON
+
+            </h2>
+
+            <p id="modalDescription">
+
+                Description
+
+            </p>
+
+            <div class="modal-info">
+
+                <div>
+
+                    <span>Category</span>
+
+                    <strong
+                        id="modalCategory">
+
+                        -
+
+                    </strong>
+
+                </div>
+
+                <div>
+
+                    <span>Clearance</span>
+
+                    <strong>
+
+                        LV.4
+
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<!-- =======================================
+IMAGE VIEWER
+======================================= -->
+
+<div
+    id="imageViewer"
+    class="image-viewer">
+
+    <img
+        id="viewerImage"
+        src=""
+        alt="">
+
+</div>
+
+
+
+<script src="data.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
+
+
