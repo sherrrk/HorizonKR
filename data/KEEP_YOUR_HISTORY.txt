@@ -1,0 +1,9 @@
+IMPORTANT
+이 폴더에는 사용자가 직접 수정한 최신 history.js를 넣어 주세요.
+파일명/경로: data/history.js
+
+현재 코드 구조:
+1) data/history.js가 있으면 온/오프라인 모두 history.js를 우선 사용
+2) history.js가 없으면 온라인에서는 data/history.json을 fallback으로 시도
+
+기존의 최신 수정 history.js는 덮어쓰지 마세요.
