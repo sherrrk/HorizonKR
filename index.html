@@ -82,10 +82,17 @@ UNIFIED GUIDE SYSTEM
 
 <nav class="side-nav">
 
-
-
 <button class="nav-btn active" data-section="history">
     조직 개요
+</button>
+
+<button class="nav-btn" data-section="timeline">
+    타임라인
+</button>
+<div class="nav-section-divider"><span>괴이 목록</span></div>
+
+<button class="nav-btn" data-section="korea">
+    한국지사
 </button>
 
 <button class="nav-btn" data-section="gent">
@@ -100,10 +107,11 @@ UNIFIED GUIDE SYSTEM
     청천빛 예배당
 </button>
 
-<button class="nav-btn" data-section="korea">
-    한국 지사
-</button>
+<div class="nav-section-divider nav-section-divider-plain" aria-hidden="true"></div>
 
+<button class="nav-btn" data-section="staff">
+    임직원 목록
+</button>
 
 </nav>
 
@@ -136,6 +144,10 @@ TOP HEADER
             제로 호라이즌의 시작과 기록
         </p>
 
+    </div>
+
+    <div id="locationBanner" class="location-banner" aria-hidden="true">
+        <img id="locationBannerImage" src="" alt="">
     </div>
 
     <div class="header-right">
@@ -315,6 +327,8 @@ IMAGE VIEWER
 
 
 
+<script src="data/history.js"></script>
+<script src="data/timeline.js"></script>
 <script src="data.js"></script>
 <script src="script.js"></script>
 

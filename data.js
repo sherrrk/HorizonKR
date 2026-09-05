@@ -1,13 +1,22 @@
 const database = {
 
+    // 0. 타임라인
+    timeline: {
+        records: [],
+        document: "data/timeline.json",
+        documentData: window.timelineDocument || null
+    },
+
     // 1. 히스토리 (연혁) - 기존 유지
     history: {
         records: [],
-        document: "data/history.json"
+        document: "data/history.json",
+        documentData: window.historyDocument || null
     },
 
 // 2. 젠트 임포리움 (Gent Emporium)
     gent: {
+        banner: "img/젠트.png",
         info: {
             title: "Gent Emporium",
             description: "괴이 거래 전문 기관."
@@ -273,6 +282,7 @@ const database = {
 
 // 3. 화안 교도소 (Hwa-An Penitentiary)
     hwa: {
+        banner: "img/화안.png",
         info: {
             title: "화안 교도소 (Hwa-An Penitentiary)",
             description: "초자연적 범죄자 및 위험 괴이 수용 시설."
@@ -480,6 +490,7 @@ const database = {
 
    // 4. 한국지사 (Korea Branch)
     korea: {
+        banner: "img/한국지사.png",
         info: {
             title: "제0의 지평선 한국지사 (The 0th Horizon - Korea Branch)",
             description: "한국지부 심층 지하 격리 및 관리 시설."
@@ -758,12 +769,116 @@ const database = {
         ] // korea의 records 배열 닫기
     }, // korea 객체 닫기
 
-    // 추가하려는 청천빛 예배당 섹션
+    // 청천빛 예배당 섹션
     chapel: {
+        banner: "img/청천.png",
         info: {
             title: "Blue Chapel",
-            description: "본 시설은 현재 폐쇄됨 (사유: ███ ██ ██)"
+            description: "LEVEL 5 CLEARANCE"
         },
-        records: []
+        entityListTitle: "ENTITY LIST",
+        notice: "본 위키의 괴이는 관리 및 격리 대상이 아니며, 제액신장의 몸과 융합되었거나 혹은 제액신장의 존재 자체가 본 괴이에 해당하는 경우이다.",
+        records: [
+            {
+                type: "ENTITY",
+                title: "범에게 홀린 파계승",
+                tag: "DG-S-FALLENMONK",
+                category: "ENTITY",
+                description: "██ 산에 존재하는 파계승 괴이. 정확히는, 파계승보다는 호랑이가 본체에 더 가깝다. 보통은 인간에게 위해를 끼치지 않으나, 인의예지를 버린 인간에게는 가차없이 응징을 가한다. 한 파계승이 이 범의 봉인을 열었다가 그대로 몸이 (검열)되었다. 현재는 제액신장의 법우(본명 장채혁)의 몸에 스며들어 하나가 되었다.",
+                comment: "인사담당자 K: 채혁씨는 인의예지가 없는 인간이었던 모양입니다. 하지만 구전 속 파계승만큼은 아니고.... 그 반 정도였던 걸까요?"
+            },
+            {
+                type: "ENTITY",
+                title: "화공 솔거의 용",
+                tag: "DG-S-COURTPAINTER",
+                category: "ENTITY",
+                description: "신라시대에 존재했다고 여겨지는 신비로운 화공, 솔거의 마지막 그림이다. 이 그림 속 용은 뛰어난 미감을 가진 이들을 매혹한다. 용은 그림 밖을 향해 앞발을 내밀고 있으며, 이에 손을 맞잡은 이들은 몸에 용의 기운이 스며들어 인간의 한계를 초월하는 것으로 알려져 있다. 현재는 제액신장 라밀(본명 유이정)의 몸에 스며들어 하나가 되었다. 손톱이 먹처럼 검게 물들고, 몸에 용의 그림이 새겨지며, 눈이 희게 샌다. 입에 특수 제작된 부적을 물고 있지 않으면, 마주한 인간들의 생기를 빼앗는 것으로 확인되었다.",
+                comment: "인사담당자 K: 이정군은 아주 발랄하고 성실한 청년입니다. 식사 하실 때 상당히 번거로워 보이더군요."
+            },
+            {
+                type: "ENTITY",
+                title: "란타",
+                tag: "DG-S-DRAGONNONAME",
+                category: "ENTITY",
+                description: "신라시대에 존재했다고 여겨지는 용이다. 본명은 알 수 없고, 가르쳐줄 마음도 없는 모양이다. 기본적으로는 인간에게 매우 비호의적이다. 조선시대에 한 인간을 만나 사랑하게 되었으며, 현재는 그 사람의 환생을 찾고 있다. 덕분에 인간은 여전히 경멸하면서도 제0의 지평선과 협력 중인 매우 강력한 전력. 현재는 제액신장에서 암약 중.",
+                comment: "인사담당자 K: 가능하면 눈 마주치지 맙시다. 당신이 란타의 정인의 환생이 아니라면 말입니다..."
+            },
+            {
+                type: "ENTITY",
+                title: "비형랑",
+                tag: "DG-S-AEGISPHANTOM",
+                category: "ENTITY",
+                description: "신라시대 설화로 전해지는 '비형랑'에서 탄생한 괴이. 그 설화가 오래된만큼 비형랑도 나이를 많이 먹었다. 본래 인간에게 헌신적이고 호의적이나, 현재도 그런지는 미지수. 도깨비를 부리는 주술을 사용한다. 현재 제액신장 팀의 리더를 맡고 있다.",
+                comment: "인사담당자 K: 좋은 분이십니다. 이런 분이 지사에 오래오래 남아주시려면 주면에 좋은 사람이 많아야 하죠. 그리고 저는 당신이 그 '좋은 사람'이라고 확신합니다."
+            },
+            {
+                type: "ENTITY",
+                title: "저 편의 여신",
+                tag: "DG-S-GODNESS",
+                category: "ENTITY",
+                description: "바리데기 설화에서 파생된 괴이. 아름다운 여신의 모습을 하고 있으며, 아무도 그녀의 행방을 알지 못했지만 최근 확인되었다. 제액신장의 사한(본명 추사현)의 태생부터 몸에 결합된 채로 세상에 났으며, 주변에 비극(특히 종교적 비극)을 끌어들이는 특징을 갖고 있다. 이 여신과 결합된 대가로 숙주는 강력한 퇴마 능력을 갖게 된다.",
+                comment: "인사담당자 K: 아이러니하죠. 재능을 주고 그에 비하는 비극을 끌어들인다니. 능력을 준 만큼 해결해야 할 문제도 주는 것일까요? 아니면 단순히 불행이 옴처럼 붙는 것 뿐일까요."
+            },
+            {
+                type: "ENTITY",
+                title: "루시드 드림",
+                tag: "DG-S-LUCIDDREAM",
+                category: "ENTITY",
+                description: "한때 유행했던 '루시드 드림 체험 후기'가 도시괴담이 된 형태. 격리가 불가능한 괴이이다. 현재는 한국지사에서 '루시드 드림' 유행을 통제함으로써 사람들의 관심이 옮겨갔기에 약해졌으나, 제액신장의 해원(본명 백해원)은 운 나쁘게도 이 괴이를 만나 저주를 받았다. 현재 해원은 죽을 수 없는 몸인 것으로 확인되었다.",
+                comment: "인사담당자 K: 꿈과 현실의 경계를 없앤 것처럼 생과 사의 경계를 없애버린 것... 일까요?"
+            },
+            {
+                type: "ENTITY",
+                title: "천년 구미호",
+                tag: "DG-S-9FOX",
+                category: "ENTITY",
+                description: "수련하여 인간이 된 구미호다. 나이는 800년이지만 실제로는 20대 초반의 사회초년생과 다를 게 없다. 순박하고 순진한 면이 있으며, 늘 자연을 그리워하는 듯 하면서도 인간들 사이의 연결을 갈망한다. 대부분이 중성적이고 매력적인 인간의 모습을 취한다고 알려져 있다. 구미호 원광은 지사에서 공식 발견한 첫번째 구미호이며, 제액신장의 막내로 채용되었다.",
+                comment: "인사담당자 K: 원광씨가 데리고 다니는 월백이(아기여우)는 무척 귀엽습니다. 이거 중요합니다."
+            }
+        ]
     }
 }; // 전체 database 객체 닫기
+
+// 임직원 명부 전용 페이지
+database.staff = {
+    groups: [
+        { key: "gent", title: "젠트 임포리움", count: 5 },
+        { key: "hwa", title: "화안 교도소", count: 4 },
+        { key: "korea", title: "한국지사", count: 8 },
+        { key: "chapel", title: "청천빛 예배당", count: 7 }
+    ],
+    staff: {
+        gent: [
+            { name:"헬릭", image:"img/14-헬릭.png", gender:"남성", age:"145세", position:"젠트 임포리움 지점장", feature:"본래 인간이었던 것으로 추정. 현재는 젠트 임포리움 지점장." },
+            { name:"토르소", image:"img/16-토르소.png", gender:"남성", age:"???세", position:"거주 괴이", feature:"목 없는 신사 괴이. 인간에게 상당히 우호적(예의를 지킨다면)" },
+            { name:"재단사", image:"img/15-재단사.png", gender:"남성", age:"미등록", position:"미등록", feature:"상주 괴이 중 하나. 가능하면 마주치지 않는 것을 추천." },
+            { name:"요한", image:"img/13-요한.png", gender:"남성", age:"110세", position:"직원", feature:"상주 괴이 중 하나. 한 때 인간이었던 것으로 추정. 현재는 젠트 임포리움 지하층 담당." },
+            { name:"유태현", image:"img/17-유태현.png", gender:"남성", age:"29세", position:"직원", feature:"상주 직원. 업무 처리 능력이 매우 뛰어나나, 성격은 좋지 않음." }
+        ],
+        hwa: [
+            { name:"화야", image:"img/4-화야.png", gender:"남성", age:"1012세(추정)", position:"교도소장", feature:"목이 그림자 형태인 괴이 간부." },
+            { name:"서바다", image:"img/1-서바다.png", gender:"남성", age:"27세", position:"상급 요원", feature:"제0의 지평선에서도 극비리에 채용된 요원. (검열)예비 대상이었으나 기각됨." },
+            { name:"로그", image:"img/2-로그.png", gender:"남성", age:"???세", position:"교도관", feature:"인공 괴이 중 하나. 그의 존재에 대해 의구심을 갖지 말 것." },
+            { name:"무진", image:"img/3-무진.png", gender:"남성", age:"???세", position:"알 필요 없음.", feature:"본 항목을 알려고 하지 말 것." }
+        ],
+        korea: [
+            { name:"디코드", image:"img/10-디코드.png", gender:"남성", age:"1874세(라고 주장 중)", position:"지부장", feature:"목이 없는 신사 괴이. 한국지사의 지부장으로, 권력싸움에는 욕심이 없음." },
+            { name:"처용", image:"img/6-처용.png", gender:"남성", age:"1150세(추정)", position:"정화팀 팀장", feature:"처용가에서 파생된 괴이.  자부 내에서도 인간에게 무척 호의적인 존재로 손꼽힘." },
+            { name:"헌화", image:"img/9-헌화.png", gender:"남성", age:"???세", position:"정화팀 부팀장", feature:"머리 대신 꽃이 달린 괴이. 이름과 생김새처럼 평화주의자로 유명함." },
+            { name:"애쉬", image:"img/8-애쉬.png", gender:"남성", age:"85세(추정)", position:"관찰팀 팀장", feature:"제2차 세계대전에서 탄생한 것으로 추측되는 괴이. 성격이 나쁘다. 가능하면 신경 거스르지 말 것." },
+            { name:"사슴", image:"img/5-사슴.png", gender:"", age:"30세", position:"연구팀 팀장", feature:"폐사찰 사슴신 민담에서 탄생한 괴이. 대상의 신체 일부를 맛보면 과거를 엿보는 독특한 능력 보유." },
+            { name:"지청한", image:"img/12-지청한.png", gender:"남성", age:"34세", position:"특수제압팀 팀장", feature:"괴이 '심해로부터' 에서 오염된 인간으로, 이지를 유지하는 동시에 강력한 전력 지원 가능함." },
+            { name:"여태선", image:"img/11-여태선.png", gender:"남성", age:"27세", position:"격리 요원", feature:"본래 관찰부 요원이었으나, 창세회 잠입 작전에서 크게 오염됨. 현재는 별도 격리 중." },
+            { name:"숭배자", image:"img/7-숭배자.png", gender:"남성", age:"144세(추정)", position:"격리 괴이", feature:"창세회에서 만든 인공 괴이로 추정됨. 본사에서 옮겨진 것으로 추측되며, 현재는 한국지사에서 격리 중." }
+        ],
+        chapel: [
+            { name:"비형랑", image:"img/21-비형랑.png", gender:"남성", age:"1447세(라고 주장)", position:"제액신장 팀장", feature:"비형랑 설화에서 유래된 것으로 추정되는 괴이. 도깨비를 부리며, 디코드를 제외하고 가장 오래된 간부." },
+            { name:"법우", image:"img/20-법우.png", gender:"남성", age:"35세", position:"제액신장", feature:"본명 장채혁. 모 호랑이 괴이와 함쳐진 인간. 전직 조직 폭력배. 현재는 박수무당으로 위장 중." },
+            { name:"란타", image:"img/19-란타.png", gender:"남성", age:"???세", position:"제액신장", feature:"아주 오랜 세월을 살아온 용. 신라시대로 추정. 인간에게 비호의적이나, 정인의 환생을 찾고 있기에 지사와 협력 중." },
+            { name:"라밀", image:"img/22-라밀.png", gender:"남성", age:"25세", position:"제액신장", feature:"본명 유이정. 휴학중인 미대생으로, 화공 솔거의 그림 괴이에 접촉했다가 괴이와 합쳐짐." },
+            { name:"사한", image:"img/23-사한.png", gender:"남성", age:"32세", position:"제액신장", feature:"본명 추사현. 본래 한국지사의 요원이었으나, 추후에 괴이와 태생부터 결합되어 있었음이 밝혀져 제액신장에 스카웃." },
+            { name:"해원", image:"img/24-해원.png", gender:"남성", age:"34세", position:"제액신장", feature:"본명 백해원. 장의사로 위장 중이며, 도시괴담에서 파생된 '루시드 드림'괴이에 오염되어 생사의 경계가 모호한 상태." },
+            { name:"원광", image:"img/18-원광.png", gender:"남성", age:"800세", position:"제액신장", feature:"구미호 요괴. 나이로 치면 비형랑 버금가게 많지만 실제론 18~20세 정도의 사회성인 듯. 데리고 다니는 여우 영물이 매우 귀여움.(중요)" }
+        ]
+    }
+};

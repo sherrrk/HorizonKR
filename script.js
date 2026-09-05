@@ -14,9 +14,14 @@ const title = document.querySelector("header h2");
 
 const subtitle = document.querySelector("header p");
 
+const topHeader = document.querySelector(".top-header");
+const locationBanner = document.querySelector("#locationBanner");
+const locationBannerImage = document.querySelector("#locationBannerImage");
+
 const navButtons = document.querySelectorAll(".nav-btn");
 
 const searchInput = document.querySelector("#searchInput");
+const searchBox = document.querySelector(".search-box");
 
 const documentView = document.querySelector("#documentView");
 
@@ -59,6 +64,28 @@ function render(){
 
 if(!cards) return;
 
+// 검색창은 괴이 목록 페이지에서만 노출
+if(searchBox){
+    const hideSearch = ["history", "timeline", "staff"].includes(currentSection);
+    searchBox.classList.toggle("is-hidden", hideSearch);
+}
+
+// 장소 페이지 배너
+if(locationBanner && locationBannerImage && topHeader){
+    if(page.banner){
+        locationBannerImage.src = page.banner;
+        locationBannerImage.alt = `${page.info?.title || currentSection} 배너`;
+        locationBanner.classList.add("active");
+        locationBanner.setAttribute("aria-hidden", "false");
+        topHeader.classList.add("has-location-banner");
+    }else{
+        locationBannerImage.removeAttribute("src");
+        locationBannerImage.alt = "";
+        locationBanner.classList.remove("active");
+        locationBanner.setAttribute("aria-hidden", "true");
+        topHeader.classList.remove("has-location-banner");
+    }
+}
 
 // 카드 영역 비우기
 
@@ -68,18 +95,20 @@ cards.innerHTML="";
 const list = page.records || [];
 
 
-// 청천빛 예배당 잠금
-if(currentSection === "chapel"){
-    cards.innerHTML = `
-    <div class="access-denied-wrapper">
-        <div class="clearance-lock">
-            <span class="warning-icon">⚠️</span>
-            <div class="warning-title">ACCESS DENIED</div>
-            <div class="warning-text">본 시설 데이터는 레벨 5 이상만 열람 가능합니다.</div>
-        </div>
-    </div>
-    `;
+// 임직원 명부
+if(currentSection === "staff"){
+    renderStaffDirectory(page);
     return;
+}
+
+if(page.notice){
+    const notice = document.createElement("div");
+    notice.className = "entity-page-notice";
+    notice.innerHTML = `
+        <span class="entity-page-notice-label">NOTICE / LEVEL 5 CLEARANCE</span>
+        <p>${page.notice}</p>
+    `;
+    cards.appendChild(notice);
 }
 
 if(list.length > 0){
@@ -121,7 +150,7 @@ if(list.length > 0){
     if (entities.length > 0) {
         const entityTitle = document.createElement("div");
         entityTitle.className = "section-header-title";
-        entityTitle.innerHTML = `<h2>ENTITY LIST</h2>`;
+        entityTitle.innerHTML = `<h2>${page.entityListTitle || "ENTITY LIST"}</h2>`;
         cards.appendChild(entityTitle);
 
         entities.forEach(item => {
@@ -131,10 +160,11 @@ if(list.length > 0){
 }
 // 문서형 페이지
 
-if(page.document){
+if(page.documentData || page.document){
 
     openDocument({
-        file:page.document
+        file: page.document,
+        documentData: page.documentData
     });
 
 }
@@ -145,7 +175,9 @@ if(page.document){
 if(
     list.length===0 &&
     !page.document &&
-    currentSection !== "chapel"
+    !page.documentData &&
+    currentSection !== "chapel" &&
+    currentSection !== "staff"
 ){
 
     cards.innerHTML=`
@@ -262,6 +294,11 @@ function updateHeader(section){
 
     switch(section){
 
+        case "timeline":
+            title.textContent="Timeline";
+            subtitle.textContent="제0의 지평선과 한반도 괴이 통제 체계의 연혁";
+            break;
+
         case "history":
 
             title.textContent="History";
@@ -283,7 +320,7 @@ function updateHeader(section){
         case "chapel":
 
             title.textContent="Blue Chapel";
-            subtitle.textContent="본 시설은 현재 폐쇄됨 (사유: ███ ██ ██)";
+            subtitle.textContent="LEVEL 5 CLEARANCE";
             break;
 
 	case "korea":
@@ -364,15 +401,33 @@ async function openDocument(data){
 
     try{
 
-        const response = await fetch(data.file);
+        let doc = data.documentData || null;
 
-        if(!response.ok){
+        // history.js가 있으면 온/오프라인 모두 이 데이터를 사용합니다.
+        // 없는 경우에는 GitHub Pages 등 온라인 환경에서 history.json으로 폴백합니다.
+        if(!doc){
+            const response = await fetch(data.file);
 
-            throw new Error(response.status);
+            if(!response.ok){
+                throw new Error(response.status);
+            }
 
+            doc = await response.json();
         }
 
-        const doc = await response.json();
+        // 타임라인 전용 레이아웃
+        if(doc.layout === "timeline"){
+            documentContent.innerHTML = buildTimeline(doc);
+            documentView.classList.add("active");
+            return;
+        }
+
+        // 조직 개요 전용 레이아웃
+        if(doc.layout === "organization-overview"){
+            documentContent.innerHTML = buildOrganizationOverview(doc);
+            documentView.classList.add("active");
+            return;
+        }
 
         let html = "";
 
@@ -521,6 +576,327 @@ documentView.scrollIntoView({
 }
 
 /*==================================================
+ORGANIZATION OVERVIEW / HISTORY
+==================================================*/
+
+function buildHistoryOperationPanel(item){
+    if(item.status === "placeholder"){
+        return `
+            <div class="history-operation-placeholder">
+                <span class="history-operation-placeholder-code">DATA PENDING</span>
+                <h3>${item.title}</h3>
+                <p>${item.message || "시설 내부 구조 및 운영방침 자료가 등록되지 않았습니다."}</p>
+            </div>
+        `;
+    }
+
+    const intro = item.intro || [];
+    const floors = item.floors || [];
+    const departments = item.departments || [];
+    const ranks = item.ranks || [];
+
+    const introHtml = intro.map(section => `
+        <section class="history-operation-copy">
+            <h4>${section.title}</h4>
+            ${(section.paragraphs || []).map(p => `<p>${p}</p>`).join("")}
+        </section>
+    `).join("");
+
+    const floorsHtml = floors.map((floor, index) => `
+        <article class="facility-node ${floor.risk ? `risk-${floor.risk}` : ""} ${floor.closed ? "is-closed" : ""}">
+            <div class="facility-floor">${floor.floor}</div>
+            <div class="facility-node-point" aria-hidden="true"></div>
+            <div class="facility-node-content">
+                <div class="facility-node-head">
+                    <strong>${floor.facility}</strong>
+                    ${floor.code ? `<span>${floor.code}</span>` : ""}
+                </div>
+                <p>${floor.purpose || ""}</p>
+            </div>
+        </article>
+    `).join("");
+
+    const departmentHtml = departments.map(row => `
+        <div class="history-system-row">
+            <strong>${row.name}</strong>
+            <span>${row.work}</span>
+        </div>
+    `).join("");
+
+    const rankHtml = ranks.map(row => `
+        <div class="history-system-row">
+            <strong>${row.type}</strong>
+            <span>${row.order}</span>
+        </div>
+    `).join("");
+
+    const systemCards = [
+        departments.length ? `
+            <section class="history-system-card">
+                <div class="history-subheading">
+                    <span>DEPARTMENT SYSTEM</span>
+                    <h4>부서 체계</h4>
+                </div>
+                <div class="history-system-table">${departmentHtml}</div>
+            </section>` : "",
+        ranks.length ? `
+            <section class="history-system-card">
+                <div class="history-subheading">
+                    <span>RANK SYSTEM</span>
+                    <h4>직급 체계</h4>
+                </div>
+                <div class="history-system-table">${rankHtml}</div>
+            </section>` : ""
+    ].filter(Boolean).join("");
+
+    const systemCount = (departments.length ? 1 : 0) + (ranks.length ? 1 : 0);
+
+    return `
+        <div class="history-operation-header ${item.restricted ? "is-restricted" : ""}">
+            <span class="history-operation-code">${item.en || ""}</span>
+            <h3>${item.title}</h3>
+            ${item.subtitle ? `<p>${item.subtitle}</p>` : ""}
+        </div>
+
+        <div class="history-operation-intro">
+            ${introHtml}
+        </div>
+
+        ${floors.length ? `
+        <section class="facility-network-section">
+            <div class="history-subheading">
+                <span>FACILITY NETWORK</span>
+                <h4>층별 시설 구조</h4>
+            </div>
+            ${item.networkNote ? `<div class="facility-network-note">${item.networkNote}</div>` : ""}
+            <div class="facility-network">
+                ${floorsHtml}
+            </div>
+        </section>` : ""}
+
+        ${systemCards ? `
+        <div class="history-system-grid ${systemCount === 1 ? "single" : ""}">
+            ${systemCards}
+        </div>` : ""}
+    `;
+}
+
+function switchHistoryOperationTab(id){
+    document.querySelectorAll("[data-operation-tab]").forEach(button => {
+        const active = button.dataset.operationTab === id;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", active ? "true" : "false");
+    });
+
+    document.querySelectorAll("[data-operation-panel]").forEach(panel => {
+        panel.classList.toggle("active", panel.dataset.operationPanel === id);
+    });
+}
+
+function buildTimeline(doc){
+    const entries = doc.entries || [];
+    const entryHtml = entries.map((item, index) => `
+        <article class="timeline-entry">
+            <div class="timeline-marker" aria-hidden="true">
+                <span>${String(index + 1).padStart(2, "0")}</span>
+            </div>
+            <div class="timeline-entry-card">
+                <div class="timeline-date">${item.date}</div>
+                <h2>${item.title}</h2>
+                <div class="timeline-copy">
+                    ${(item.paragraphs || []).map(p => `<p>${p}</p>`).join("")}
+                </div>
+            </div>
+        </article>
+    `).join("");
+
+    return `
+        <div class="timeline-document">
+            <div class="history-clearance-strip">
+                <span>ARCHIVE / CHRONOLOGY</span>
+                <strong>ZERO HORIZON HISTORICAL RECORD</strong>
+            </div>
+            <div class="timeline-heading">
+                <span class="history-overview-kicker">HISTORICAL TIMELINE</span>
+                <h1>${doc.title || "타임라인"}</h1>
+                ${doc.subtitle ? `<p>${doc.subtitle}</p>` : ""}
+            </div>
+            <div class="timeline-axis">
+                ${entryHtml}
+            </div>
+            <div class="timeline-endmark"><span>2026 / PRESENT</span></div>
+        </div>
+    `;
+}
+
+function buildOrganizationOverview(doc){
+    const concepts = doc.concepts || [];
+    const organizations = doc.organizations || [];
+    const branch = doc.branch || {};
+    const teams = branch.teams || [];
+    const covertTeam = branch.covertTeam || null;
+    const majorFacilities = doc.majorFacilities || [];
+
+    const conceptHtml = concepts.map(item => `
+        <article class="history-concept-card">
+            <div class="history-card-title">${item.title}</div>
+            <div class="history-card-en">${item.en || ""}</div>
+            <p>${item.description || ""}</p>
+        </article>
+    `).join("");
+
+    const organizationHtml = organizations.map(item => `
+        <article class="history-organization-card">
+            ${item.logo ? `<div class="history-org-logo"><img src="${item.logo}" alt="${item.title} 로고"></div>` : `<div class="history-org-symbol" aria-hidden="true">◉</div>`}
+            <div class="history-card-title">${item.title}</div>
+            <div class="history-card-en">${item.en || ""}</div>
+            <div class="history-mini-divider"></div>
+            <p>${item.description || ""}</p>
+        </article>
+    `).join("");
+
+    const teamLogoMap = {
+        "연구팀": "img/YG_logo.png",
+        "관찰팀": "img/GC_logo.png",
+        "정화팀": "img/JH_logo.png",
+        "특수제압팀": "img/TJ_logo.png"
+    };
+
+    const teamHtml = teams.map((team, index) => {
+        const logo = team.logo || teamLogoMap[team.title] || "";
+        return `
+        <article class="history-team-card">
+            ${logo ? `<div class="history-team-logo"><img src="${logo}" alt="${team.title} 로고"></div>` : `<div class="history-team-index">0${index + 1}</div>`}
+            <div class="history-card-title">${team.title}</div>
+            <div class="history-card-en">${team.en || ""}</div>
+            <p>${team.description || ""}</p>
+        </article>
+        `;
+    }).join("");
+
+    const covertTeamHtml = covertTeam ? `
+        <section class="history-covert-team">
+            <div class="history-covert-label">${covertTeam.label || "비공식 · 비밀 특수팀"}</div>
+            <div class="history-covert-body">
+                <div class="history-covert-main">
+                    ${covertTeam.logo ? `<div class="history-covert-logo"><img src="${covertTeam.logo}" alt="${covertTeam.title} 로고"></div>` : ""}
+                    <div class="history-covert-title">${covertTeam.title || "제액신장"}</div>
+                    <div class="history-covert-en">${covertTeam.en || "SPECIAL TEAM"}</div>
+                    <p>${covertTeam.description || ""}</p>
+                </div>
+                ${Array.isArray(covertTeam.traits) && covertTeam.traits.length ? `
+                <div class="history-covert-traits">
+                    ${covertTeam.traits.map(item => `<span>${item}</span>`).join("")}
+                </div>` : ""}
+            </div>
+        </section>
+    ` : "";
+
+    const majorFacilityHtml = majorFacilities.map((facility, index) => `
+        <div class="history-major-facility-card">
+            <span class="history-major-facility-index">${String(index + 1).padStart(2, "0")}</span>
+            <strong>${facility.title}</strong>
+        </div>
+    `).join("");
+
+    const operations = doc.operations || [];
+    const defaultOperationId = (operations.find(item => item.status !== "placeholder") || operations[0] || {}).id;
+
+    const operationsTabs = operations.map(item => `
+        <button type="button"
+                class="history-operation-tab ${item.id === defaultOperationId ? "active" : ""}"
+                data-operation-tab="${item.id}"
+                aria-selected="${item.id === defaultOperationId ? "true" : "false"}"
+                onclick="switchHistoryOperationTab('${item.id}')">
+            ${item.tabTitle || item.title}
+        </button>
+    `).join("");
+
+    const operationsPanels = operations.map(item => `
+        <section class="history-operation-panel ${item.id === defaultOperationId ? "active" : ""}" data-operation-panel="${item.id}">
+            ${buildHistoryOperationPanel(item)}
+        </section>
+    `).join("");
+
+    return `
+        <div class="history-overview">
+            <div class="history-clearance-strip">
+                <span>LEVEL 5 CLEARANCE</span>
+                <strong>레벨 5 이상 접근 가능</strong>
+            </div>
+
+            <div class="history-overview-heading">
+                <span class="history-overview-kicker">ORGANIZATION MAP</span>
+                <h1>${doc.title || "조직 관계도"}</h1>
+                <div class="history-heading-line"></div>
+            </div>
+
+            <section class="history-concept-grid">
+                ${conceptHtml}
+            </section>
+
+            <div class="history-relation-line" aria-hidden="true">
+                <span></span><i></i><span></span>
+            </div>
+
+            <section class="history-organization-grid">
+                ${organizationHtml}
+            </section>
+
+            <section class="history-branch-block">
+                <div class="history-branch-node">
+                    <span class="history-branch-logo"><img src="img/KR_logo.png" alt="한국지사 로고"></span>
+                    <div>
+                        <div class="history-card-title">${branch.title || "한국지사"}</div>
+                        <div class="history-card-en">${branch.en || "KOREA BRANCH"}</div>
+                    </div>
+                </div>
+
+                <div class="history-branch-stem" aria-hidden="true"></div>
+                <div class="history-group-label">${branch.groupLabel || "공식 소속팀"}</div>
+                <div class="history-team-stem" aria-hidden="true"></div>
+
+                <div class="history-team-grid">
+                    ${teamHtml}
+                </div>
+
+                ${covertTeamHtml}
+
+                ${majorFacilities.length ? `
+                <div class="history-major-facilities">
+                    <div class="history-major-facility-label">
+                        <span>PRIMARY CONTAINMENT FACILITIES</span>
+                        <strong>주요 격리 시설</strong>
+                    </div>
+                    <div class="history-major-facility-grid">
+                        ${majorFacilityHtml}
+                    </div>
+                </div>
+                ` : ""}
+            </section>
+
+            ${operations.length ? `
+            <section class="history-operations">
+                <div class="history-section-heading">
+                    <span class="history-overview-kicker">FACILITY OPERATIONS</span>
+                    <h2>시설 주요 구조 및 운영방침</h2>
+                    <div class="history-heading-line"></div>
+                </div>
+
+                <div class="history-operation-tabs" role="tablist" aria-label="시설 선택">
+                    ${operationsTabs}
+                </div>
+
+                <div class="history-operation-panels">
+                    ${operationsPanels}
+                </div>
+            </section>
+            ` : ""}
+        </div>
+    `;
+}
+
+/*==================================================
 CREATE CARD (ONLY ENTITY / NO IMAGE)
 ==================================================*/
 
@@ -566,5 +942,54 @@ function createCard(data){
         </div>
     `;
 
+    return card;
+}
+
+/*==================================================
+STAFF DIRECTORY
+==================================================*/
+function renderStaffDirectory(page){
+    cards.innerHTML = "";
+    const groups = page.groups || [];
+    const staffMap = page.staff || {};
+
+    groups.forEach(group=>{
+        const section = document.createElement("section");
+        section.className = "staff-directory-section";
+
+        const head = document.createElement("div");
+        head.className = "staff-directory-heading";
+        const groupStaff = staffMap[group.key] || [];
+        head.innerHTML = `<div><span class="staff-kicker">FACILITY</span><h2>${group.title}</h2></div><div class="staff-count">총 ${group.count ?? groupStaff.length}명</div>`;
+        section.appendChild(head);
+
+        const grid = document.createElement("div");
+        grid.className = "staff-card-grid";
+        groupStaff.forEach((staff, idx)=>grid.appendChild(createStaffCard(staff, idx)));
+        section.appendChild(grid);
+
+        cards.appendChild(section);
+    });
+}
+
+function createStaffCard(staff, index){
+    const card = document.createElement("article");
+    card.className = "staff-card";
+    const image = staff.image
+        ? `<img src="${staff.image}" alt="${staff.name}">`
+        : `<div class="staff-image-placeholder"><span>NO IMAGE</span></div>`;
+    card.innerHTML = `
+        <div class="staff-photo">${image}</div>
+        <div class="staff-card-body">
+            <div class="staff-card-index">STAFF ${String(index+1).padStart(2,"0")}</div>
+            <h3>${staff.name}</h3>
+            <dl class="staff-meta">
+                <div><dt>성별</dt><dd>${staff.gender}</dd></div>
+                <div><dt>나이</dt><dd>${staff.age}</dd></div>
+                <div><dt>직위</dt><dd>${staff.position}</dd></div>
+                <div><dt>특징</dt><dd>${staff.feature}</dd></div>
+            </dl>
+        </div>
+    `;
     return card;
 }
